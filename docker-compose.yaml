@@ -1,54 +1,6 @@
-version: '3.8'
+version: '3.3'
 
 services:
-  free5gc-upf-1:
-    container_name: upf1
-    build:
-      context: ./nf_upf
-      args:
-        DEBUG_TOOLS: "false"
-    command: ./free5gc-upfd -f ../config/upfcfg.yaml
-    volumes:
-      - "./config/upfcfg1.yaml:/free5gc/config/upfcfg.yaml"
-    cap_add:
-      - NET_ADMIN
-    networks:
-      privnet:
-        aliases:
-          - upf1
-
-  free5gc-upf-2:
-    container_name: upf2
-    build:
-      context: ./nf_upf
-      args:
-        DEBUG_TOOLS: "false"
-    command: ./free5gc-upfd -f ../config/upfcfg.yaml
-    volumes:
-      - ./config/upfcfg2.yaml:/free5gc/config/upfcfg.yaml
-    cap_add:
-      - NET_ADMIN
-    networks:
-      privnet:
-        aliases:
-          - upf2
-
-  free5gc-upf-b:
-    container_name: upfb
-    build:
-      context: ./nf_upf
-      args:
-        DEBUG_TOOLS: "false"
-    command: ./free5gc-upfd -f ../config/upfcfg.yaml
-    volumes:
-      - ./config/upfcfgb.yaml:/free5gc/config/upfcfg.yaml
-    cap_add:
-      - NET_ADMIN
-    networks:
-      privnet:
-        aliases:
-          - upfb
-
   db:
     container_name: mongodb
     image: mongo
@@ -81,6 +33,8 @@ services:
       privnet:
         aliases:
           - nrf
+    ports:
+      - "29510:29510"
     depends_on:
       - db
 
@@ -102,6 +56,8 @@ services:
       privnet:
         aliases:
           - amf
+    ports:
+      - "29518:29518"
     depends_on:
       - free5gc-nrf
 
@@ -123,6 +79,8 @@ services:
       privnet:
         aliases:
           - ausf
+    ports:
+      - "29509:29509"
     depends_on:
       - free5gc-nrf
 
@@ -144,6 +102,8 @@ services:
       privnet:
         aliases:
           - nssf
+    ports:
+      - "29531:29531"
     depends_on:
       - free5gc-nrf
 
@@ -165,6 +125,8 @@ services:
       privnet:
         aliases:
           - pcf
+    ports:
+      - "29507:29507"
     depends_on:
       - free5gc-nrf
 
@@ -187,11 +149,10 @@ services:
       privnet:
         aliases:
           - smf
+    ports:
+      - "29502:29502"
     depends_on:
       - free5gc-nrf
-      - free5gc-upf-1
-      - free5gc-upf-2
-      - free5gc-upf-b
 
   free5gc-udm:
     container_name: udm
@@ -211,6 +172,8 @@ services:
       privnet:
         aliases:
           - udm
+    ports:
+      - "29503:29503"
     depends_on:
       - db
       - free5gc-nrf
@@ -236,6 +199,8 @@ services:
       privnet:
         aliases:
           - udr
+    ports:
+      - "29504:29504"
     depends_on:
       - db
       - free5gc-nrf
@@ -262,7 +227,6 @@ services:
     depends_on:
       - free5gc-amf
       - free5gc-smf
-      - free5gc-upf-b
 
   free5gc-webui:
     container_name: webui
@@ -282,6 +246,20 @@ services:
           - webui
     ports:
       - "5000:5000"
+    depends_on:
+      - db
+  
+  free5gc-mongo-express:
+    container_name: mongo-express
+    image: mongo-express
+    networks:
+      privnet:
+        aliases:
+          - mongo-express
+    links:
+      - db:mongo
+    ports:
+      - "8081:8081"
     depends_on:
       - db
 
